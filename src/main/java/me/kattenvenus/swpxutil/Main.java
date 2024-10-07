@@ -26,7 +26,7 @@ public class Main {
     }
 
     public Main() throws LoginException {
-        DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(System.getenv("API_KEY"));
+        DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(System.getProperty("API_KEY"));
 
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.listening("Paralyserade (unreleased)"));
@@ -50,7 +50,7 @@ public class Main {
                         "\nVersion: 1.0.1" +
                         "\n#####################################################\n");
             } catch (InvalidTokenException e) {
-                LogHandler.printErrorMessage("Provided bot token is invalid, make sure to set -API_KEY=yourBotApiKey as startup variable!");
+                LogHandler.printErrorMessage("Provided bot token is invalid, make sure to set -DAPI_KEY=\"yourBotApiKey\" before the -jar variable!");
             } catch (LoginException e) {
                 LogHandler.printErrorMessage("Unable to start bot");
                 e.printStackTrace();

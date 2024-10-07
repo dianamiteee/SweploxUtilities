@@ -10,8 +10,10 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
@@ -158,20 +160,23 @@ public class BannerVote {
         }
 
         String channelID = bannerVote.getChannelID();
-        try {
-            event.getGuild().getTextChannelById(channelID).retrieveMessageById(bannerVote.getMessageID()).queue(result -> {
 
-                ManageJSON.getBannerVoteData().remove(bannerVote);
-                ManageJSON.save();
+            event.getGuild().getTextChannelById(channelID).retrieveMessageById(bannerVote.getMessageID()).submit().whenComplete((result, error) -> {
+
+                if (error != null) {
+                    LogHandler.replyErrorMessage(event,"Autoreply Cancel", "Couldnt find Bannervote message, attemping to delete regardless");
+                    ManageJSON.getBannerVoteData().remove(bannerVote);
+                    ManageJSON.save();
+                    error.printStackTrace();
+                    return;
+                }
+
                 result.delete().queue();
-                event.reply("Bannervote deleted!").setEphemeral(true).queue();
+                LogHandler.replySystemMessage(event,"Bannervote", "Deletion successful!");
 
             });
 
-        } catch (Exception e) {
-            event.reply("Can't find message!").queue();
-            e.printStackTrace();
-        }
+
 
     }
 

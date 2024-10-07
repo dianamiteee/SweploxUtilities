@@ -31,7 +31,7 @@ public class LogHandler {
 
     public static void replySystemMessage(GenericCommandInteractionEvent event, String command, String msg) {
 
-        event.reply("**["+command+"]** " + msg).queue();
+        event.reply("`" + command.toUpperCase() + "`\n**" + msg + "**").setEphemeral(true).queue();
 
     }
 

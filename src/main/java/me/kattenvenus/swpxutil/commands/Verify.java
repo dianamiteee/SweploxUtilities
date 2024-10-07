@@ -1,7 +1,8 @@
 package me.kattenvenus.swpxutil.commands;
 
 import me.kattenvenus.swpxutil.datatypes.Messages;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.LogHandler;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.Channel;
@@ -25,43 +26,50 @@ public class Verify {
             verifiedUser = event.getOption("user").getAsUser();
         } else {
             event.reply(Messages.GENERICFATALERROR).setEphemeral(true).queue();
+            LogHandler.replyErrorMessageWithThread(event, "verify", Thread.currentThread().getStackTrace()[1]);
             return;
         }
 
         if (event.getOption("reason") != null) {
             reason = event.getOption("reason").getAsString();
         } else {
-            event.reply(Messages.GENERICFATALERROR).setEphemeral(true).queue();
+            LogHandler.replyErrorMessageWithThread(event, "verify", Thread.currentThread().getStackTrace()[1]);
             return;
         }
 
         Role verifiedRole;
         try {
-            verifiedRole = event.getGuild().getRoleById(ManageServerData.getCurrentData().getVerifiedRole());
+            verifiedRole = event.getGuild().getRoleById(ManageJSON.getServerData().getVerifiedRole());
         } catch (NullPointerException e) {
-            event.reply(Messages.GENERICFATALERROR + " verifyUser").setEphemeral(true).queue();
+            LogHandler.replyErrorMessageWithThread(event, "verify", Thread.currentThread().getStackTrace()[1]);
             return;
         }
 
-        try {
+        try { //Adds member role
             event.getGuild().addRoleToMember(verifiedUser, verifiedRole).queue();
         } catch (HierarchyException e) {
-            event.reply("**Bot can't give role with higher privileges than itself!**").setEphemeral(true).queue();
+            LogHandler.replyErrorMessage(event, "verify", "Bot can't give role with higher privileges than itself!");
             e.printStackTrace();
             return;
         } catch (IllegalArgumentException e) {
-            event.reply("**No role/channel selected**").setEphemeral(true).queue();
+            LogHandler.replyErrorMessage(event, "verify", "No role/channel selected");
             e.printStackTrace();
             return;
         } catch (Exception e) {
-            event.reply("**UNABLE TO VERIFY USER, CONTACT KATTENVENUS**").setEphemeral(true).queue();
+            LogHandler.replyErrorMessageWithThread(event, "verify", Thread.currentThread().getStackTrace()[1]);
             e.printStackTrace();
             return;
+        }
+
+        try { //Removes unverified role
+            event.getGuild().removeRoleFromMember(verifiedUser,event.getGuild().getRolesByName("unverified",true).get(0)).queue();
+        } catch (Exception e) {
+
         }
 
         String preparedString = "**User:** " + verifiedUser.getAsMention() + " *(At join: " + verifiedUser.getEffectiveName() + ")* **got verified by:** " + event.getUser().getAsMention() + ", **with reason:** " + reason;
 
-        event.getGuild().getTextChannelById(ManageServerData.getCurrentData().getVerifiedChannel()).sendMessage(preparedString).queue();
+        event.getGuild().getTextChannelById(ManageJSON.getServerData().getVerifiedChannel()).sendMessage(preparedString).queue();
         event.reply(verifiedUser.getAsMention() + Messages.NEWVERIFIEDMEMBER).queue();
 
     }
@@ -77,8 +85,8 @@ public class Verify {
             return;
         }
 
-        ManageServerData.getCurrentData().setVerifiedChannel(verifiedChannel.getId());
-        ManageServerData.save();
+        ManageJSON.getServerData().setVerifiedChannel(verifiedChannel.getId());
+        ManageJSON.save();
         event.reply("Current verified channel changed!").setEphemeral(true).queue();
 
     }
@@ -94,8 +102,8 @@ public class Verify {
             return;
         }
 
-        ManageServerData.getCurrentData().setVerifiedRole(verifiedRole.getId());
-        ManageServerData.save();
+        ManageJSON.getServerData().setVerifiedRole(verifiedRole.getId());
+        ManageJSON.save();
         event.reply("Current verified role changed!").setEphemeral(true).queue();
 
     }
@@ -121,7 +129,7 @@ public class Verify {
             return;
         }
 
-        MessageChannel affectedChannel = event.getGuild().getTextChannelById(ManageServerData.getCurrentData().getVerifiedChannel());
+        MessageChannel affectedChannel = event.getGuild().getTextChannelById(ManageJSON.getServerData().getVerifiedChannel());
 
         final String msg = newMessage;
 
@@ -135,15 +143,13 @@ public class Verify {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
                 LocalDateTime now = LocalDateTime.now(); //Get date
 
-                System.out.println(message.getContentRaw());
-
 
                 if (matchFound) {
                     try {
                         message.editMessage(matcher.group(1) + " " + msg + "\n*(Edited @ " + dtf.format(now) + ")*").queue(); //Actually editing the message
                     } catch (Exception e) {
                         event.reply("Can't edit message, is it one from the Sweplox bot?").setEphemeral(true).queue();
-                        System.out.println("Couldn't edit message with id " + messageID);
+                        LogHandler.printErrorMessage("Verify: Couldn't edit message with id " + messageID);
                         e.printStackTrace();
                         return;
                     }

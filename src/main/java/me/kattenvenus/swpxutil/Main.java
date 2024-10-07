@@ -4,7 +4,7 @@ import me.kattenvenus.swpxutil.listeners.ButtonListeners;
 import me.kattenvenus.swpxutil.listeners.MessageListener;
 import me.kattenvenus.swpxutil.listeners.ModalListener;
 import me.kattenvenus.swpxutil.utilities.LogHandler;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
@@ -44,10 +44,10 @@ public class Main {
 
             try {
                 new Main();
-                ManageServerData.load();
+                ManageJSON.load();
                 System.out.println("\n#####################################################\n" +
-                        "Successfully initialized Sweplox Utilites by KattenVenus" +
-                        "\nVersion: 1.0.0" +
+                        "Successfully initialized Sweplox Utilites by Dianamite" +
+                        "\nVersion: 1.0.1" +
                         "\n#####################################################\n");
             } catch (InvalidTokenException e) {
                 LogHandler.printErrorMessage("Provided bot token is invalid, make sure to set -API_KEY=yourBotApiKey as startup variable!");

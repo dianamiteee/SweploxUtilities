@@ -4,7 +4,7 @@ import me.kattenvenus.swpxutil.commands.Autoreply;
 import me.kattenvenus.swpxutil.commands.BannerVote;
 import me.kattenvenus.swpxutil.datatypes.BannerVoteData;
 import me.kattenvenus.swpxutil.datatypes.Messages;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -24,7 +24,7 @@ public class ButtonListeners extends ListenerAdapter {
 
             case "replyAdd":
 
-                if (!ManageServerData.checkPermission(event, "autoreply")) {
+                if (!ManageJSON.checkPermission(event, "autoreply")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -58,7 +58,7 @@ public class ButtonListeners extends ListenerAdapter {
 
             case "replyRemove":
 
-                if (!ManageServerData.checkPermission(event, "autoreply")) {
+                if (!ManageJSON.checkPermission(event, "autoreply")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -86,7 +86,7 @@ public class ButtonListeners extends ListenerAdapter {
                 break;
             case "replyList":
 
-                if (!ManageServerData.checkPermission(event, "autoreply")) {
+                if (!ManageJSON.checkPermission(event, "autoreply")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -145,7 +145,7 @@ public class ButtonListeners extends ListenerAdapter {
         //The buttons id ends with an number for which type, see AutoReply.getMessage(), so we need to check for that
         if (event.getComponentId().contains("replyRemoveForwards")){
 
-            if (!ManageServerData.checkPermission(event, "autoreply")) {
+            if (!ManageJSON.checkPermission(event, "autoreply")) {
                 event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                 return;
             }
@@ -157,7 +157,7 @@ public class ButtonListeners extends ListenerAdapter {
 
         if (event.getComponentId().contains("replyRemoveBackwards")){
 
-            if (!ManageServerData.checkPermission(event, "autoreply")) {
+            if (!ManageJSON.checkPermission(event, "autoreply")) {
                 event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                 return;
             }
@@ -171,14 +171,14 @@ public class ButtonListeners extends ListenerAdapter {
 
             case "applyBanner":
 
-                if (!ManageServerData.checkPermission(event, "bannervoteadmin")) {
+                if (!ManageJSON.checkPermission(event, "bannervoteadmin")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
 
                 String messageID = event.getMessageId();
 
-                BannerVoteData bannerVote = ManageServerData.getCurrentData().getActiveBannervotes().stream().filter(id -> messageID.equals(id.getMessageID())).findFirst().orElse(null);
+                BannerVoteData bannerVote = ManageJSON.getBannerVoteData().stream().filter(id -> messageID.equals(id.getMessageID())).findFirst().orElse(null);
 
                 byte[] banner;
 

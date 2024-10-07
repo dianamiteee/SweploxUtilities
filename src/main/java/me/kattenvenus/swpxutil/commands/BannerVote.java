@@ -3,7 +3,7 @@ package me.kattenvenus.swpxutil.commands;
 import me.kattenvenus.swpxutil.datatypes.BannerVoteData;
 import me.kattenvenus.swpxutil.datatypes.Messages;
 import me.kattenvenus.swpxutil.utilities.LogHandler;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -23,7 +23,7 @@ public class BannerVote {
     public static void changeBannerVoteRatings(int likes, int dislikes, ButtonInteractionEvent event) {
 
         String messageID = event.getMessageId();
-        BannerVoteData bannerVote = ManageServerData.getCurrentData().getActiveBannervotes().stream().filter(id -> messageID.equals(id.getMessageID())).findFirst().orElse(null);
+        BannerVoteData bannerVote = ManageJSON.getBannerVoteData().stream().filter(id -> messageID.equals(id.getMessageID())).findFirst().orElse(null);
 
         String userID = event.getUser().getId();
 
@@ -54,7 +54,7 @@ public class BannerVote {
         bannerVote.setLikes(newLikes);
         bannerVote.setDislikes(newDislikes);
 
-        ManageServerData.save();
+        ManageJSON.save();
 
         String channelID = bannerVote.getChannelID();
 
@@ -75,7 +75,7 @@ public class BannerVote {
         if (event.getOption("channel") != null) {
             channel = event.getOption("channel").getAsChannel();
         } else {
-            event.reply(Messages.GENERICFATALERROR + " " + Thread.currentThread().getStackTrace()[1].getMethodName()).setEphemeral(true).queue();
+            LogHandler.replyErrorMessageWithThread(event, "setDefaultChannel", Thread.currentThread().getStackTrace()[1]);
             return;
         }
 
@@ -85,8 +85,8 @@ public class BannerVote {
 
     public static void setDefaultChannel(String channelID) {
 
-        ManageServerData.getCurrentData().setBannervoteDefaultChannel(channelID);
-        ManageServerData.save();
+        ManageJSON.getServerData().setBannervoteDefaultChannel(channelID);
+        ManageJSON.save();
 
     }
 
@@ -98,8 +98,8 @@ public class BannerVote {
     
     public static void resetBannerVoteData(SlashCommandInteractionEvent event) {
 
-        ManageServerData.getCurrentData().getActiveBannervotes().clear();
-        ManageServerData.save();
+        ManageJSON.getBannerVoteData().clear();
+        ManageJSON.save();
 
         event.reply("**Bannervote JSON Reset!**").queue();
 
@@ -107,7 +107,7 @@ public class BannerVote {
 
     public static void updateBannerVotes(Guild guild) {
 
-        for (BannerVoteData s : ManageServerData.getCurrentData().getActiveBannervotes()) {
+        for (BannerVoteData s : ManageJSON.getBannerVoteData()) {
 
             if (s.getUnixTime() + 86400 < System.currentTimeMillis() / 1000L) {
 
@@ -116,15 +116,15 @@ public class BannerVote {
 
                         (message) -> {
                             message.delete().queue();
-                            ManageServerData.getCurrentData().getActiveBannervotes().remove(s);
-                            ManageServerData.save();
+                            ManageJSON.getBannerVoteData().remove(s);
+                            ManageJSON.save();
                         },
 
                         (failure) -> {
 
                             LogHandler.printErrorMessage("Couldn't find bannervote message of " + s.getUserID() + "only deleting bannervote on backend.");
-                            ManageServerData.getCurrentData().getActiveBannervotes().remove(s);
-                            ManageServerData.save();
+                            ManageJSON.getBannerVoteData().remove(s);
+                            ManageJSON.save();
 
                         });
 
@@ -150,7 +150,7 @@ public class BannerVote {
         }
 
         String userID = user.getId();
-        BannerVoteData bannerVote = ManageServerData.getCurrentData().getActiveBannervotes().stream().filter(id -> userID.equals(id.getUserID())).findFirst().orElse(null);
+        BannerVoteData bannerVote = ManageJSON.getBannerVoteData().stream().filter(id -> userID.equals(id.getUserID())).findFirst().orElse(null);
 
         if (bannerVote == null) {
             event.reply("No active Bannervote").setEphemeral(true).queue();
@@ -161,8 +161,8 @@ public class BannerVote {
         try {
             event.getGuild().getTextChannelById(channelID).retrieveMessageById(bannerVote.getMessageID()).queue(result -> {
 
-                ManageServerData.getCurrentData().getActiveBannervotes().remove(bannerVote);
-                ManageServerData.save();
+                ManageJSON.getBannerVoteData().remove(bannerVote);
+                ManageJSON.save();
                 result.delete().queue();
                 event.reply("Bannervote deleted!").setEphemeral(true).queue();
 
@@ -186,8 +186,8 @@ public class BannerVote {
             return;
         }
 
-        ManageServerData.getCurrentData().getBannervoteBannedUsers().add(user.getId());
-        ManageServerData.save();
+        ManageJSON.getServerData().getBannervoteBannedUsers().add(user.getId());
+        ManageJSON.save();
 
         event.reply("**User " + user.getAsMention() + " has been banned from bannervoting**").setEphemeral(true).queue();
 
@@ -197,7 +197,7 @@ public class BannerVote {
 
         StringBuilder sb = new StringBuilder();
 
-        for (String s : ManageServerData.getCurrentData().getBannervoteBannedUsers()) {
+        for (String s : ManageJSON.getServerData().getBannervoteBannedUsers()) {
 
             sb.append("**");
             sb.append(event.getGuild().getMemberById(s).getUser().getEffectiveName());
@@ -235,8 +235,8 @@ public class BannerVote {
             return;
         }
 
-        ManageServerData.getCurrentData().getBannervoteBannedUsers().remove(user.getId());
-        ManageServerData.save();
+        ManageJSON.getServerData().getBannervoteBannedUsers().remove(user.getId());
+        ManageJSON.save();
 
         event.reply("**User " + user.getAsMention() + " has been unbanned from bannervoting**").setEphemeral(true).queue();
 
@@ -276,7 +276,7 @@ public class BannerVote {
             return;
         }
 
-        for (BannerVoteData s : ManageServerData.getCurrentData().getActiveBannervotes()) {
+        for (BannerVoteData s : ManageJSON.getBannerVoteData()) {
 
             if(s.getUserID().equals(event.getUser().getId())) {
 
@@ -291,7 +291,7 @@ public class BannerVote {
         banner.getProxy().download().whenComplete((bannerData,th) -> { //Downloads the image
 
 
-            String channelID = ManageServerData.getCurrentData().getBannervoteDefaultChannel();
+            String channelID = ManageJSON.getServerData().getBannervoteDefaultChannel();
             try {
                 event.getGuild().getTextChannelById(channelID)// Sends the image
                         .sendMessageEmbeds(createEmbed(desc, banner.getUrl(), 0, 0, event.getUser().getId(), event.getUser()))
@@ -300,7 +300,7 @@ public class BannerVote {
                             //Creates a local version of the vote, we need both a link to the image and the Base65 version of it as well
                             BannerVoteData bannerVoteData = new BannerVoteData(event.getUser().getId(),
                                     0, 0, (desc == null) ? "A staff need to approve it but **WE CAN VOTE FOR IT WOOO**" : desc,
-                                    "", banner.getUrl(), "", ManageServerData.getCurrentData().getBannervoteDefaultChannel());
+                                    "", banner.getUrl(), "", ManageJSON.getServerData().getBannervoteDefaultChannel());
 
                             try {
                                 bannerVoteData.setBannerJSON(bannerData); //Adds the image which will be converted to base64
@@ -309,8 +309,8 @@ public class BannerVote {
                             }
 
                             bannerVoteData.setMessageID(msg.getId());
-                            ManageServerData.getCurrentData().getActiveBannervotes().add(bannerVoteData);
-                            ManageServerData.save();
+                            ManageJSON.getBannerVoteData().add(bannerVoteData);
+                            ManageJSON.save();
                         });
             } catch (Exception e) {
                 event.reply("**Couldnt start banner vote**").setEphemeral(true).queue();

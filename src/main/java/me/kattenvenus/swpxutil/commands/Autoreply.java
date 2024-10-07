@@ -1,7 +1,7 @@
 package me.kattenvenus.swpxutil.commands;
 
 import me.kattenvenus.swpxutil.datatypes.Messages;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -36,15 +36,15 @@ public class Autoreply {
         switch (type) {
 
             case 0:
-                return ManageServerData.getCurrentData().getAutoReplyMessages();
+                return ManageJSON.getServerData().getAutoReplyMessages();
             case 1:
-                return ManageServerData.getCurrentData().getAutoReplyMessagesExact();
+                return ManageJSON.getServerData().getAutoReplyMessagesExact();
             case 2:
-                return ManageServerData.getCurrentData().getAutoReplyEmojis();
+                return ManageJSON.getServerData().getAutoReplyEmojis();
             case 3:
-                return ManageServerData.getCurrentData().getAutoReplyEmojisExact();
+                return ManageJSON.getServerData().getAutoReplyEmojisExact();
             case 4:
-                return ManageServerData.getCurrentData().getAutoReplyAllowedChannels();
+                return ManageJSON.getServerData().getAutoReplyAllowedChannels();
 
         }
 
@@ -115,31 +115,31 @@ public class Autoreply {
 
         boolean allowedChannel = false;
 
-        for (String s : ManageServerData.getCurrentData().getAutoReplyAllowedChannels().keySet()) { //Checks if the message was sent in an allowed channel
+        for (String s : ManageJSON.getServerData().getAutoReplyAllowedChannels().keySet()) { //Checks if the message was sent in an allowed channel
             if (s.equalsIgnoreCase(event.getChannel().getId())) allowedChannel = true;
         }
 
         if (!allowedChannel) return;
 
 
-        for (String s: ManageServerData.getCurrentData().getAutoReplyMessagesExact().keySet()) {
+        for (String s: ManageJSON.getServerData().getAutoReplyMessagesExact().keySet()) {
             if (s.equalsIgnoreCase(event.getMessage().getContentRaw().toLowerCase())) {
-                event.getMessage().reply(ManageServerData.getCurrentData().getAutoReplyMessagesExact().get(s)).queue();
+                event.getMessage().reply(ManageJSON.getServerData().getAutoReplyMessagesExact().get(s)).queue();
                 return;
             }
         }
 
-        for (String s: ManageServerData.getCurrentData().getAutoReplyMessages().keySet()) {
+        for (String s: ManageJSON.getServerData().getAutoReplyMessages().keySet()) {
             if (event.getMessage().getContentRaw().toLowerCase().contains(s.toLowerCase())) {
-                event.getMessage().reply(ManageServerData.getCurrentData().getAutoReplyMessages().get(s)).queue();
+                event.getMessage().reply(ManageJSON.getServerData().getAutoReplyMessages().get(s)).queue();
                 return;
             }
         }
 
-        for (String s: ManageServerData.getCurrentData().getAutoReplyEmojisRaw().keySet()) {
+        for (String s: ManageJSON.getServerData().getAutoReplyEmojisRaw().keySet()) {
             if (event.getMessage().getContentRaw().toLowerCase().contains(s.toLowerCase())) {
 
-                for (String ss : ManageServerData.getCurrentData().getAutoReplyEmojisRaw().get(s)) {
+                for (String ss : ManageJSON.getServerData().getAutoReplyEmojisRaw().get(s)) {
 
                     event.getMessage().addReaction(Emoji.fromFormatted(ss)).submit()
                             .whenComplete((success, error) -> {
@@ -153,10 +153,10 @@ public class Autoreply {
             }
         }
 
-        for (String s: ManageServerData.getCurrentData().getAutoReplyEmojisExactRaw().keySet()) {
+        for (String s: ManageJSON.getServerData().getAutoReplyEmojisExactRaw().keySet()) {
             if (event.getMessage().getContentRaw().equalsIgnoreCase(s)) {
 
-                for (String ss : ManageServerData.getCurrentData().getAutoReplyEmojisExactRaw().get(s)) { //Looks through all emojis from map
+                for (String ss : ManageJSON.getServerData().getAutoReplyEmojisExactRaw().get(s)) { //Looks through all emojis from map
 
                     event.getMessage().addReaction(Emoji.fromFormatted(ss)).submit()
                             .whenComplete((success, error) -> {
@@ -254,10 +254,10 @@ public class Autoreply {
             return;
         }
 
-        int pages = ManageServerData.getCurrentData().getAutoReplyMessages().size() / 26;
+        int pages = ManageJSON.getServerData().getAutoReplyMessages().size() / 26;
 
         System.out.println(pages);
-        System.out.println(ManageServerData.getCurrentData().getAutoReplyMessages().size());
+        System.out.println(ManageJSON.getServerData().getAutoReplyMessages().size());
 
         if (pages > 0) { //Only shows buttons if there is more than 1 page
             Button button1 = Button.primary("replyRemoveBackwards"+type, "< Prev page");
@@ -299,14 +299,14 @@ public class Autoreply {
                 System.out.println(s);
 
                 if (type == 2) { //Reaction autoreplys
-                    ManageServerData.getCurrentData().getAutoReplyEmojisRaw().remove(s);
+                    ManageJSON.getServerData().getAutoReplyEmojisRaw().remove(s);
                 } else if (type == 3) { //Reaction EXACT autoreplys
-                    ManageServerData.getCurrentData().getAutoReplyEmojisExactRaw().remove(s);
+                    ManageJSON.getServerData().getAutoReplyEmojisExactRaw().remove(s);
                 } else {
                     getMessages(type).remove(s);
                 }
 
-                ManageServerData.save();
+                ManageJSON.save();
                 event.reply("**Auto reply removed!**").setEphemeral(true).queue();
                 event.getMessage().delete().queue();
                 return;
@@ -382,10 +382,10 @@ public class Autoreply {
 
         switch (type) {
             case 2:
-                map = ManageServerData.getCurrentData().getAutoReplyEmojisRaw();
+                map = ManageJSON.getServerData().getAutoReplyEmojisRaw();
                 break;
             case 3:
-                map = ManageServerData.getCurrentData().getAutoReplyEmojisExactRaw();
+                map = ManageJSON.getServerData().getAutoReplyEmojisExactRaw();
                 break;
             default:
                 event.reply(Messages.GENERICFATALERROR + " " + Thread.currentThread().getStackTrace()[1].getMethodName()).setEphemeral(true).queue();
@@ -416,7 +416,7 @@ public class Autoreply {
         }
 
         map.put(msg, reactionsParsed.toArray(new String[0]));
-        ManageServerData.save();
+        ManageJSON.save();
 
         event.reply("**Reaction autoreply added!**").setEphemeral(true).queue();
 
@@ -497,8 +497,8 @@ public class Autoreply {
     public static void addChannel(EntitySelectInteractionEvent event) {
 
         Channel channel = (Channel)event.getValues().get(0);
-        ManageServerData.getCurrentData().getAutoReplyAllowedChannels().put(channel.getId(),channel.getName());
-        ManageServerData.save();
+        ManageJSON.getServerData().getAutoReplyAllowedChannels().put(channel.getId(),channel.getName());
+        ManageJSON.save();
 
         event.reply("**Channel has been allowed!**").setEphemeral(true).queue();
         event.getMessage().delete().queue();
@@ -556,7 +556,7 @@ public class Autoreply {
     public static void addMessage(String key, String value,int type) {
 
         getMessages(type).put(key, value);
-        ManageServerData.save();
+        ManageJSON.save();
 
     }
 

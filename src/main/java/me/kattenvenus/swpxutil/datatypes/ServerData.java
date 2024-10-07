@@ -11,8 +11,7 @@ public class ServerData {
     private String verifiedChannel;
     private String verifiedRole;
     private Map<String, ArrayList<String>> permissions = new HashMap<>();
-    private ArrayList<BannerVoteData> activeBannerVoteData = new ArrayList<>();
-    private String BannervoteDefaultChannel;
+    private String bannervoteDefaultChannel;
     private final ArrayList<String> bannervoteBannedUsers = new ArrayList<>();
     private final Map<String, String> autoReplyMessages = new HashMap<>();
     private final Map<String, String> autoReplyMessagesExact = new HashMap<>();
@@ -21,11 +20,11 @@ public class ServerData {
     private final Map<String, String> autoReplyAllowedChannels = new HashMap<>();
 
     public String getBannervoteDefaultChannel() {
-        return BannervoteDefaultChannel;
+        return bannervoteDefaultChannel;
     }
 
     public void setBannervoteDefaultChannel(String bannervoteDefaultChannel) {
-        BannervoteDefaultChannel = bannervoteDefaultChannel;
+        this.bannervoteDefaultChannel = bannervoteDefaultChannel;
     }
 
     public ArrayList<String> getBannervoteBannedUsers() {
@@ -97,10 +96,6 @@ public class ServerData {
 
     public void setVerifiedChannel(String verifiedChannel) {
         this.verifiedChannel = verifiedChannel;
-    }
-
-    public ArrayList<BannerVoteData> getActiveBannervotes() {
-        return activeBannerVoteData;
     }
 
     public String getVerifiedRole() {

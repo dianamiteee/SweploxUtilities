@@ -1,6 +1,6 @@
 package me.kattenvenus.swpxutil.commands;
 
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class Swpxperms {
             return;
         }
 
-        if (ManageServerData.getCurrentData().getPermissions().get(event.getOption("permissionnode").getAsString()) == null) {
+        if (ManageJSON.getServerData().getPermissions().get(event.getOption("permissionnode").getAsString()) == null) {
             event.reply("Invalid permission node").setEphemeral(true).queue();
             return;
         }
@@ -42,7 +42,7 @@ public class Swpxperms {
 
     public static void listPerms(SlashCommandInteractionEvent event) {
 
-        Map<String, ArrayList<String>> map = ManageServerData.getCurrentData().getPermissions();
+        Map<String, ArrayList<String>> map = ManageJSON.getServerData().getPermissions();
 
         StringBuilder sb = new StringBuilder();
 
@@ -58,7 +58,7 @@ public class Swpxperms {
 
     private static boolean managePerms(String snowflake, String permissionNode) {
 
-        ArrayList<String> perms = ManageServerData.getCurrentData().getPermissions().get(permissionNode);
+        ArrayList<String> perms = ManageJSON.getServerData().getPermissions().get(permissionNode);
 
         boolean exists = false;
         snowflake = snowflake.replaceAll("\\D", "");
@@ -73,12 +73,12 @@ public class Swpxperms {
         }
 
         if (exists) {
-            ManageServerData.getCurrentData().getPermissions().get(permissionNode).remove(snowflake);
-            ManageServerData.save();
+            ManageJSON.getServerData().getPermissions().get(permissionNode).remove(snowflake);
+            ManageJSON.save();
             return true;
         } else {
-            ManageServerData.getCurrentData().getPermissions().get(permissionNode).add(snowflake);
-            ManageServerData.save();
+            ManageJSON.getServerData().getPermissions().get(permissionNode).add(snowflake);
+            ManageJSON.save();
             return false;
         }
 

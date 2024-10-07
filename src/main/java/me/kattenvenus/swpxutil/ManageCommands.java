@@ -4,7 +4,7 @@ import me.kattenvenus.swpxutil.commands.*;
 import me.kattenvenus.swpxutil.datatypes.Messages;
 import me.kattenvenus.swpxutil.datatypes.ServerData;
 import me.kattenvenus.swpxutil.utilities.LogHandler;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -219,7 +219,7 @@ public class ManageCommands extends ListenerAdapter {
 
             case "adminnitrocolor":
 
-                if (!ManageServerData.checkPermission(event, "adminnitrocolor")) {
+                if (!ManageJSON.checkPermission(event, "adminnitrocolor")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -248,7 +248,7 @@ public class ManageCommands extends ListenerAdapter {
             case "verify":
 
 
-                if (!ManageServerData.checkPermission(event, "verify")) {
+                if (!ManageJSON.checkPermission(event, "verify")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -265,7 +265,7 @@ public class ManageCommands extends ListenerAdapter {
                     return;
                 }
 
-                if (!ManageServerData.checkPermission(event, "verifyadmin")) {
+                if (!ManageJSON.checkPermission(event, "verifyadmin")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -288,12 +288,12 @@ public class ManageCommands extends ListenerAdapter {
 
                 try {
 
-                    if (!ManageServerData.getCurrentData().isKnifeParty()) {
+                    if (!ManageJSON.getServerData().isKnifeParty()) {
                         event.reply("No knives are available").queue();
                         return;
                     }
 
-                    if (ManageServerData.isOnDeathList(event.getUser())) {
+                    if (ManageJSON.isOnDeathList(event.getUser())) {
                         event.reply(event.getUser().getAsMention() + " **tried to play baddie without a knife lmao**").queue();
                         return;
                     }
@@ -309,7 +309,7 @@ public class ManageCommands extends ListenerAdapter {
             case "handlerofcutlery":
 
 
-                if (!ManageServerData.checkPermission(event, "handlerofcutlery")) {
+                if (!ManageJSON.checkPermission(event, "handlerofcutlery")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -329,7 +329,7 @@ public class ManageCommands extends ListenerAdapter {
 
                 if (Objects.equals(event.getSubcommandName(), "toggleforall")) {
 
-                    ServerData currentData = ManageServerData.getCurrentData();
+                    ServerData currentData = ManageJSON.getServerData();
 
                     if (currentData.isKnifeParty()) {
                         currentData.setKnifeParty(false);
@@ -339,7 +339,7 @@ public class ManageCommands extends ListenerAdapter {
                         event.reply("tihi uwu knives for everyoneeee uwuwuwu").setEphemeral(true).queue();
                     }
 
-                    ManageServerData.save();
+                    ManageJSON.save();
 
 
                 }
@@ -348,19 +348,19 @@ public class ManageCommands extends ListenerAdapter {
 
             case "jsonreload":
 
-                if (!ManageServerData.checkPermission(event, "jsonreload")) {
+                if (!ManageJSON.checkPermission(event, "jsonreload")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
 
-                ManageServerData.load();
+                ManageJSON.load();
 
                 event.reply("JSON Reloaded").setEphemeral(true).queue();
                 break;
             case "jsoninit":
 
                 try { //If permissions are fucked itll work by typing the password supersecretpassword uwuwuws
-                    if (!ManageServerData.checkPermission(event, "jsoninit")) {
+                    if (!ManageJSON.checkPermission(event, "jsoninit")) {
                         event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                         return;
                     }
@@ -371,7 +371,7 @@ public class ManageCommands extends ListenerAdapter {
                         return;
                     }
 
-                    ManageServerData.init(event);
+                    ManageJSON.init(event);
                     break;
 
                 }
@@ -381,11 +381,11 @@ public class ManageCommands extends ListenerAdapter {
                     return;
                 }
 
-                ManageServerData.init(event);
+                ManageJSON.init(event);
                 break;
             case "swpxperms":
 
-                if (!ManageServerData.checkPermission(event, "swpxperms")) {
+                if (!ManageJSON.checkPermission(event, "swpxperms")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -405,12 +405,12 @@ public class ManageCommands extends ListenerAdapter {
                 break;
             case "bannervote":
 
-                if (!ManageServerData.checkPermission(event, "bannervote")) {
+                if (!ManageJSON.checkPermission(event, "bannervote")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
 
-                for (String s : ManageServerData.getCurrentData().getBannervoteBannedUsers()) {
+                for (String s : ManageJSON.getServerData().getBannervoteBannedUsers()) {
 
                     if (s.equals(event.getUser().getId())) {
                         event.reply("**Thy liberty, " + event.getUser().getAsMention() + ", to utilize Bannervoting hath been revoked**").queue();
@@ -437,7 +437,7 @@ public class ManageCommands extends ListenerAdapter {
 
             case "adminbannervote":
 
-                if (!ManageServerData.checkPermission(event, "bannervoteadmin")) {
+                if (!ManageJSON.checkPermission(event, "bannervoteadmin")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -470,7 +470,7 @@ public class ManageCommands extends ListenerAdapter {
 
             case "autoreply":
 
-                if (!ManageServerData.checkPermission(event, "autoreply")) {
+                if (!ManageJSON.checkPermission(event, "autoreply")) {
                     event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                     return;
                 }
@@ -528,7 +528,7 @@ public class ManageCommands extends ListenerAdapter {
         try {
             User user = event.getOption("user").getAsUser();
 
-            ManageServerData.toggleDeathList(user);
+            ManageJSON.toggleDeathList(user);
             event.reply("USER " + user.getAsMention() + " HAS BEEN **TOGGLED** FROM ACCESSING KNIVES").setEphemeral(true).queue();
 
         } catch (NullPointerException e) {
@@ -544,12 +544,12 @@ public class ManageCommands extends ListenerAdapter {
 
         try {
 
-            if (ManageServerData.getCurrentData().getKnifePartyBanList().size() < 1) {
+            if (ManageJSON.getServerData().getKnifePartyBanList().size() < 1) {
                 event.reply("**ALL THE PEOPLE HAVE ACCESS TO KNIVES**").setEphemeral(true).queue();
                 return;
             }
 
-            for (String s : ManageServerData.getCurrentData().getKnifePartyBanList()) {
+            for (String s : ManageJSON.getServerData().getKnifePartyBanList()) {
                 slainPeople = slainPeople + s + ", ";
             }
 

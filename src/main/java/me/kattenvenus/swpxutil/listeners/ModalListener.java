@@ -2,7 +2,7 @@ package me.kattenvenus.swpxutil.listeners;
 
 import me.kattenvenus.swpxutil.commands.Autoreply;
 import me.kattenvenus.swpxutil.datatypes.Messages;
-import me.kattenvenus.swpxutil.utilities.ManageServerData;
+import me.kattenvenus.swpxutil.utilities.ManageJSON;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
@@ -37,7 +37,7 @@ public class ModalListener extends ListenerAdapter {
 
         if (event.getName().equals("Add as reaction autoreply")) {
 
-            if (!ManageServerData.checkPermission(event, "autoreply")) {
+            if (!ManageJSON.checkPermission(event, "autoreply")) {
                 event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                 return;
             }
@@ -47,7 +47,7 @@ public class ModalListener extends ListenerAdapter {
 
         if (event.getName().equals("Add as reaction autoreply EXACT")) {
 
-            if (!ManageServerData.checkPermission(event, "autoreply")) {
+            if (!ManageJSON.checkPermission(event, "autoreply")) {
                 event.reply(Messages.NOTPERMITTED).setEphemeral(true).queue();
                 return;
             }

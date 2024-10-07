@@ -3,9 +3,7 @@ package me.kattenvenus.swpxutil.utilities;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import me.kattenvenus.swpxutil.datatypes.Constants;
-import me.kattenvenus.swpxutil.datatypes.Messages;
-import me.kattenvenus.swpxutil.datatypes.ServerData;
+import me.kattenvenus.swpxutil.datatypes.*;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
@@ -18,25 +16,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ManageServerData {
+public class ManageJSON {
 
-    private static ServerData currentData;
-
-    public static ServerData getCurrentData() {
-        return currentData;
+    private static ServerData serverData;
+    public static ServerData getServerData() {
+        return serverData;
     }
 
-    public static void setCurrentData(ServerData currentData) {
-        ManageServerData.currentData = currentData;
-    }
+    private static BannerVoteDataJSON bannerVoteData;
+    public static ArrayList<BannerVoteData> getBannerVoteData() { return bannerVoteData.getBannerVoteData(); } //To make more logical syntax when saving
 
     public static boolean isOnDeathList(User user) {
 
-        if (currentData.getKnifePartyBanList() == null) {
-            currentData.setKnifePartyBanList(new ArrayList<>());
+        if (serverData.getKnifePartyBanList() == null) {
+            serverData.setKnifePartyBanList(new ArrayList<>());
         }
 
-        for (String s : currentData.getKnifePartyBanList()) {
+        for (String s : serverData.getKnifePartyBanList()) {
 
             if (user.getAsMention().equalsIgnoreCase(s)) {
                 return true;
@@ -50,15 +46,15 @@ public class ManageServerData {
 
     public static void toggleDeathList(User user) {
 
-        if (currentData.getKnifePartyBanList() == null) {
-            currentData.setKnifePartyBanList(new ArrayList<>());
+        if (serverData.getKnifePartyBanList() == null) {
+            serverData.setKnifePartyBanList(new ArrayList<>());
         }
 
-        for (String s : currentData.getKnifePartyBanList()) {
+        for (String s : serverData.getKnifePartyBanList()) {
 
             if (user.getAsMention().equalsIgnoreCase(s)) {
 
-                currentData.getKnifePartyBanList().remove(s);
+                serverData.getKnifePartyBanList().remove(s);
                 save();
                 return;
 
@@ -66,7 +62,7 @@ public class ManageServerData {
 
         }
 
-        currentData.getKnifePartyBanList().add(user.getAsMention());
+        serverData.getKnifePartyBanList().add(user.getAsMention());
         save();
 
     }
@@ -79,10 +75,11 @@ public class ManageServerData {
 
         Gson gson = new Gson();
 
-        try {
+        try {  //SERVERDATA
 
             JsonReader reader = new JsonReader(new FileReader("userdata.json"));
-            currentData = gson.fromJson(reader, ServerData.class);
+            serverData = gson.fromJson(reader, ServerData.class);
+
 
             BufferedReader br = new BufferedReader(new FileReader("userdata.json"));
             String line;
@@ -90,18 +87,47 @@ public class ManageServerData {
                 System.out.println(line);
             }
 
-
-            System.out.println(currentData.isKnifeParty());
-
             if (event != null) {
-                event.reply("JSON has been reloaded!").setEphemeral(true).queue();
+                event.reply("ServerData JSON has been reloaded!").setEphemeral(true).queue();
             }
-            LogHandler.printSystemMessage("Json has been loaded!");
+            LogHandler.printSystemMessage("ServerData JSON has been loaded!");
 
         } catch (IOException | NullPointerException e) {
             e.printStackTrace();
             init();
-            LogHandler.printSystemMessage("No config found, Config created!");
+            LogHandler.printSystemMessage("No Serverdata config found, Config created!");
+        }
+
+        try {  //BANNERVOTE
+
+            JsonReader reader = new JsonReader(new FileReader("bannervote.json"));
+            bannerVoteData = (gson.fromJson(reader, BannerVoteDataJSON.class));
+
+            if (event != null) {
+                event.reply("Bannervote JSON has been reloaded!").setEphemeral(true).queue();
+            }
+            LogHandler.printSystemMessage("Bannervote JSON has been loaded!");
+
+        } catch (IOException | NullPointerException e) {
+
+            bannerVoteData = new BannerVoteDataJSON();
+
+            try (FileWriter writer = new FileWriter("bannervote.json")) {
+                gson.toJson(bannerVoteData, writer);
+
+                if (event != null) {
+                    event.reply("Created new Bannervote JSON config").setEphemeral(true).queue();
+                }
+
+            } catch (IOException ex) {
+                if (event != null) {
+                    event.reply(Messages.GENERICFATALERROR + " Failed to create bannervote JSON: " + ex).setEphemeral(true).queue();
+                    ex.printStackTrace();
+                }
+                ex.printStackTrace();
+            }
+
+            LogHandler.printSystemMessage("No Bannervote data found, Config created!");
         }
 
     }
@@ -110,10 +136,22 @@ public class ManageServerData {
     public static void save() {
 
         Gson gson = new GsonBuilder()
+                .serializeNulls()
+                .setPrettyPrinting()
                 .create();
 
         try (FileWriter writer = new FileWriter("userdata.json")) {
-            gson.toJson(currentData, writer);
+            gson.toJson(serverData, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Gson gson2 = new GsonBuilder()
+                .serializeNulls()
+                .create();
+
+        try (FileWriter writer = new FileWriter("bannervote.json")) {
+            gson2.toJson(bannerVoteData, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,6 +160,46 @@ public class ManageServerData {
 
     public static void init() {
         init(null);
+    }
+
+    public static void init(SlashCommandInteractionEvent event) {
+
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                .setPrettyPrinting()
+                .create();
+
+        ServerData data = new ServerData();
+
+        //Default values
+        data.setKnifeParty(false);
+        data.setVerifiedChannel("854503502121271328");
+        data.setVerifiedRole("293113388668813313");
+        data.setVerifiedRole("1228113693162602599");
+
+        for (var i : Constants.PERMISSION_NODES) { //Loads in all permissions to the new JSON Serverdata config
+
+            data.getPermissions().put(i, new ArrayList<>(Arrays.asList(Constants.OWNER_ID)));
+
+        }
+
+        try (FileWriter writer = new FileWriter("userdata.json")) {
+            gson.toJson(data, writer);
+
+            if (event != null) {
+                event.reply("Created new JSON config").setEphemeral(true).queue();
+            }
+
+            serverData = data;
+
+        } catch (IOException e) {
+            if (event != null) {
+                event.reply(Messages.GENERICFATALERROR + " Failed to create config: " + e).setEphemeral(true).queue();
+                e.printStackTrace();
+            }
+            e.printStackTrace();
+        }
+
     }
 
     public static boolean checkPermission(SlashCommandInteractionEvent event, String permissionNode) {
@@ -176,15 +254,16 @@ public class ManageServerData {
     public static boolean checkPermission(List<Role> roleList, User user, String permissionNode) {
 
 
-        var permissionRoles = currentData.getPermissions().get(permissionNode);
-        var adminRoles = currentData.getPermissions().get("administrator");
+        var permissionRoles = serverData.getPermissions().get(permissionNode);
+        var adminRoles = serverData.getPermissions().get("administrator");
 
         if (permissionRoles == null) {
             System.out.println("[Sweplox Util] ERROR PERMISSIONS ARE NULL");
+            LogHandler.printErrorMessage("ERROR PERMISSIONS ARE NULL");
             return false;
         }
 
-        if (permissionRoles.size() < 1) {
+        if (permissionRoles.isEmpty()) {
             return false;
         }
 
@@ -216,43 +295,5 @@ public class ManageServerData {
 
     }
 
-    public static void init(SlashCommandInteractionEvent event) {
-
-        Gson gson = new GsonBuilder()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .create();
-
-        ServerData data = new ServerData();
-
-        data.setKnifeParty(false);
-        data.setVerifiedChannel("854503502121271328");
-        data.setVerifiedRole("293113388668813313");
-        data.setVerifiedRole("1228113693162602599");
-
-        for (var i : Constants.PERMISSION_NODES) {
-
-            data.getPermissions().put(i, new ArrayList<>(Arrays.asList(Constants.OWNER_ID)));
-
-        }
-
-        try (FileWriter writer = new FileWriter("userdata.json")) {
-            gson.toJson(data, writer);
-
-            if (event != null) {
-                event.reply("Created new JSON config").setEphemeral(true).queue();
-            }
-
-            currentData = data;
-
-        } catch (IOException e) {
-            if (event != null) {
-                event.reply(Messages.GENERICFATALERROR + " Failed to create config: " + e).setEphemeral(true).queue();
-                e.printStackTrace();
-            }
-            e.printStackTrace();
-        }
-
-    }
 
 }
